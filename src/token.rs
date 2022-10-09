@@ -14,6 +14,14 @@ pub enum Value {
 pub enum Operator {
     Assign,
     Plus,
+    Minus,
+    Mul,
+    Div,
+    Lt,
+    Gt,
+    Eq,
+    NotEq,
+    Not,
 }
 
 #[derive(Debug, PartialEq)]
@@ -38,6 +46,11 @@ pub enum Paren {
 pub enum KeyWord {
     Function,
     Let,
+    True,
+    False,
+    If,
+    Else,
+    Return,
 }
 
 #[derive(Debug, PartialEq)]
@@ -61,6 +74,11 @@ pub fn get_token_type(literal: &String) -> TokenType {
     match literal.as_str() {
         "fn" => TokenType::KeyWord(KeyWord::Function),
         "let" => TokenType::KeyWord(KeyWord::Let),
+        "true" => TokenType::KeyWord(KeyWord::True),
+        "false" => TokenType::KeyWord(KeyWord::False),
+        "if" => TokenType::KeyWord(KeyWord::If),
+        "else" => TokenType::KeyWord(KeyWord::Else),
+        "return" => TokenType::KeyWord(KeyWord::Return),
         _ => match num {
             Ok(_) => TokenType::Value(Value::Int),
             Err(_) => TokenType::Value(Value::Ident),

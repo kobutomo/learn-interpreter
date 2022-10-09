@@ -27,12 +27,56 @@ impl Lexer {
         };
 
         let tok = match char {
-            '=' => Token {
-                token_type: TokenType::Operator(Operator::Assign),
-                literal: char.to_string(),
+            '=' => match self.input.chars().nth(self.read_position + 1).unwrap() {
+                '=' => {
+                    self.position = self.read_position;
+                    self.read_position += 1;
+                    Token {
+                        token_type: TokenType::Operator(Operator::Eq),
+                        literal: "==".to_string(),
+                    }
+                }
+                _ => Token {
+                    token_type: TokenType::Operator(Operator::Assign),
+                    literal: char.to_string(),
+                },
+            },
+            '!' => match self.input.chars().nth(self.read_position + 1).unwrap() {
+                '=' => {
+                    self.position = self.read_position;
+                    self.read_position += 1;
+                    Token {
+                        token_type: TokenType::Operator(Operator::NotEq),
+                        literal: "!=".to_string(),
+                    }
+                }
+                _ => Token {
+                    token_type: TokenType::Operator(Operator::Not),
+                    literal: char.to_string(),
+                },
             },
             '+' => Token {
                 token_type: TokenType::Operator(Operator::Plus),
+                literal: char.to_string(),
+            },
+            '-' => Token {
+                token_type: TokenType::Operator(Operator::Minus),
+                literal: char.to_string(),
+            },
+            '/' => Token {
+                token_type: TokenType::Operator(Operator::Div),
+                literal: char.to_string(),
+            },
+            '*' => Token {
+                token_type: TokenType::Operator(Operator::Mul),
+                literal: char.to_string(),
+            },
+            '<' => Token {
+                token_type: TokenType::Operator(Operator::Lt),
+                literal: char.to_string(),
+            },
+            '>' => Token {
+                token_type: TokenType::Operator(Operator::Gt),
                 literal: char.to_string(),
             },
             ';' => Token {
@@ -127,6 +171,17 @@ let add = fn(x, y) {
 };
 
 let result = add(five, ten);
+!-/*5;
+5 < 10 > 5;
+
+if (5 < 10) {
+    return true;
+} else {
+    return false;
+}
+
+10 == 10;
+10 != 9;
 ";
 
         let mut lexer = new(input.to_string());
@@ -382,6 +437,267 @@ let result = add(five, ten);
                 literal: ";".to_string(),
             }
         );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Not),
+                literal: "!".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Minus),
+                literal: "-".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Div),
+                literal: "/".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Mul),
+                literal: "*".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "5".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "5".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Lt),
+                literal: "<".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "10".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Gt),
+                literal: ">".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "5".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::If),
+                literal: "if".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::LParen),
+                literal: "(".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "5".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Lt),
+                literal: "<".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "10".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::RParen),
+                literal: ")".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::LBrace),
+                literal: "{".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::Return),
+                literal: "return".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::True),
+                literal: "true".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::RBrace),
+                literal: "}".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::Else),
+                literal: "else".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::LBrace),
+                literal: "{".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::Return),
+                literal: "return".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::KeyWord(KeyWord::False),
+                literal: "false".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Paren(Paren::RBrace),
+                literal: "}".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "10".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::Eq),
+                literal: "==".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "10".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "10".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Operator(Operator::NotEq),
+                literal: "!=".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Value(Value::Int),
+                literal: "9".to_string(),
+            }
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Token {
+                token_type: TokenType::Delimiter(Delimiter::SemiColon),
+                literal: ";".to_string(),
+            }
+        );
+
+        // EOF
         assert_eq!(
             lexer.next_token(),
             Token {
