@@ -63,7 +63,7 @@ impl Lexer {
                 token_type: TokenType::Special(Special::EOF),
                 literal: "".to_string(),
             },
-            ' ' | '\n' => {
+            ' ' | '\n' | '\t' | '\r' => {
                 // 飛ばして次のトークンへ
                 self.position = self.read_position;
                 self.read_position += 1;
